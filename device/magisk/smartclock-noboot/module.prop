@@ -2,5 +2,5 @@ id=smartclock-noboot
 name=Mi Smart Clock: no boot animation
 version=1
 versionCode=1
-author=MiSmartClock-Light
+author=MiSmartClock-CasaApp
 description=Disables the boot animation (its ~765 MB GPU peak crashed system_server on every boot) and ships an overlay for instant brightness changes

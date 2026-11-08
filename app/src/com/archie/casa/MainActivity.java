@@ -132,6 +132,7 @@ public final class MainActivity extends Activity implements Ha.Listener, DetailV
         root.addView(detail, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(root);
 
+        for (String id : cfg.awake) if (!ids.contains(id)) ids.add(id); // watched even if not on screen
         ha = new Ha(cfg.url, cfg.token, ids, this);
         for (RoomView rv : roomsWithSensors) rv.bind(ha.states);
         for (String id : ids) onEntity(id);
@@ -214,16 +215,16 @@ public final class MainActivity extends Activity implements Ha.Listener, DetailV
         }
         for (RoomView rv : roomsWithSensors) if (rv.hasSensor(id)) rv.invalidate();
         clock.setActive(all, ha.states);
-        if (cfg.roomLights.contains(id)) updateRoomLit();
+        if (cfg.awake.contains(id)) updateRoomLit();
         Config.Item di = detail.item();
         if (di != null && di.id.equals(id)) detail.refresh();
     }
 
     private void updateRoomLit() {
         boolean lit = false;
-        for (String l : cfg.roomLights) {
+        for (String l : cfg.awake) {
             Ha.Entity e = ha.states.get(l);
-            if (e != null && "on".equals(e.state)) lit = true;
+            if (e != null && ("on".equals(e.state) || "playing".equals(e.state) || "home".equals(e.state))) lit = true;
         }
         if (roomLit == null || roomLit != lit) Presence.setRoomLit(this, lit);
         roomLit = lit;

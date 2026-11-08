@@ -15,7 +15,7 @@ KS_ALIAS=${KS_ALIAS:-}
 rm -rf build && mkdir -p build/gen build/classes build/dex
 "$BT/aapt2" compile --dir res -o build/res.zip
 "$BT/aapt2" link -I "$JAR" --manifest AndroidManifest.xml -A assets -o build/base.apk --java build/gen \
-  --min-sdk-version 26 --target-sdk-version 33 --version-code "${VC:-19}" --version-name "${VN:-1.18}" build/res.zip
+  --min-sdk-version 26 --target-sdk-version 33 --version-code "${VC:-20}" --version-name "${VN:-1.19}" build/res.zip
 javac -nowarn -Xlint:-options --release 8 -classpath "$JAR" -encoding UTF-8 -d build/classes \
   $(find src build/gen -name '*.java')
 "$BT/d8" --release --min-api 26 --lib "$JAR" --output build/dex $(find build/classes -name '*.class')

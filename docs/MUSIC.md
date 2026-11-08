@@ -46,5 +46,10 @@ certificate signed by Google, which only licensed devices have.
 
 ## Firewall
 
-If a computer with a firewall (e.g. ufw) doesn't see the clock, it is dropping the SSDP replies. Direct
-control still works: `http://<clock-ip>:49494/desc.xml`.
+Since 1.19 the clock answers SSDP searches from port 1900, so stateful firewalls (ufw…) accept the reply.
+If a sender still can't find it, direct control works: `http://<clock-ip>:49494/desc.xml`.
+
+## The clock disappears when the screen is off
+
+Fixed by `device/install.sh` (boot script `97-smartclock-wifi.sh`): the Wi-Fi driver dropped multicast with
+the screen off. Details in [DEVICE.md](DEVICE.md#wi-fi-multicast-with-the-screen-off).

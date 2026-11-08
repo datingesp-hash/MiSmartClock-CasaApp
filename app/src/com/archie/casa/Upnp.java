@@ -57,7 +57,7 @@ final class Upnp implements Renderer.Listener {
     private final String name, udn;
     private volatile boolean running;
     private ServerSocket server;
-    private MulticastSocket ssdp;
+    private volatile MulticastSocket ssdp;
     private final ExecutorService gena = Executors.newSingleThreadExecutor();
     private final Random rnd = new Random();
     private final Map<String, Sub> subs = new ConcurrentHashMap<>();
@@ -212,8 +212,8 @@ final class Upnp implements Renderer.Listener {
                 + "<specVersion><major>1</major><minor>0</minor></specVersion><device>"
                 + "<deviceType>" + DEV + "</deviceType>"
                 + "<friendlyName>" + escape(name) + "</friendlyName>"
-                + "<manufacturer>MiSmartClock-Light</manufacturer>"
-                + "<manufacturerURL>https://github.com/datingesp-hash/MiSmartClock-Light</manufacturerURL>"
+                + "<manufacturer>MiSmartClock-CasaApp</manufacturer>"
+                + "<manufacturerURL>https://github.com/datingesp-hash/MiSmartClock-CasaApp</manufacturerURL>"
                 + "<modelDescription>Casa music receiver</modelDescription>"
                 + "<modelName>Casa</modelName><modelNumber>1</modelNumber>"
                 + "<UDN>" + udn + "</UDN>"
@@ -572,7 +572,10 @@ final class Upnp implements Renderer.Listener {
             sleep(delay);
             String ip = localIp();
             if (ip == null) return;
-            try (java.net.DatagramSocket ds = new java.net.DatagramSocket()) {
+            // reply from port 1900 (the M-SEARCH socket): firewalls on the searcher accept it as a reply
+            java.net.DatagramSocket own = ssdp;
+            try (java.net.DatagramSocket tmp = own == null || own.isClosed() ? new java.net.DatagramSocket() : null) {
+                java.net.DatagramSocket ds = tmp != null ? tmp : own;
                 for (String t : sts) {
                     String m = "HTTP/1.1 200 OK\r\nCACHE-CONTROL: max-age=1800\r\nDATE: " + new java.util.Date() + "\r\nEXT:\r\n"
                             + "LOCATION: http://" + ip + ":" + PORT + "/desc.xml\r\nSERVER: " + SERVER + "\r\n"

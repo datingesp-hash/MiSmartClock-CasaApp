@@ -1,4 +1,4 @@
-# MMiSmartClock-CasaApp
+# MiSmartClock-CasaApp
 
 Turn a **Xiaomi Mi Smart Clock (LX04)** running a custom Android 13 GSI into a fast, stable little
 **Home Assistant panel, music speaker and YouTube screen** — squeezing everything out of its 1 GB of RAM.
@@ -10,7 +10,7 @@ crashing on boot and thrashing at idle.
 
 ![Casa on the clock](docs/img/home.png)
 
-> Download the APK from **[Releases](https://github.com/datingesp-hash/MiSmartClock-Light/releases/latest)**.
+> Download the APK from **[Releases](https://github.com/datingesp-hash/MiSmartClock-CasaApp/releases/latest)**.
 
 ## Features
 
@@ -25,8 +25,8 @@ crashing on boot and thrashing at idle.
   controls slides in front of the clock when music starts.
 - **Fast YouTube streams** — a local caching proxy makes YouTube Music tracks start and seek in ~2 s
   instead of ~46 s.
-- **Glanceable screen** — stays on (dimmed) while the room light is on, turns off in the dark, wakes up
-  instantly when you bring your hand close (raw IR proximity reading).
+- **Glanceable screen** — stays on (dimmed) while the room light (or e.g. your PC) is on, turns off in the
+  dark, wakes up instantly when you bring your hand close (raw IR proximity reading).
 - **Top button remapped** — 1 press = play/pause, 2 presses = screen on/off.
 - **English and Spanish** UI (follows the system language, or set `"language"` in the config).
 
@@ -56,11 +56,49 @@ stalled constantly, crashed `system_server` on every boot and sometimes rebooted
 | **Music** | No way to send music to the clock (Google Cast receivers need Google certificates) | Built-in DLNA receiver, discovered by Home Assistant / Music Assistant | Casa |
 | **YouTube Music seek** | **~46 s** (Android's WebM extractor scans the whole file; YouTube throttles full downloads) | **~2 s** start and seek | Casa's local caching proxy (1 MB `Range` chunks) |
 | **Dimmed → bright** | ~2.5 s brightness ramp | Instant | Framework overlay with brightness ramp = 0 |
-| **Screen at night** | Always on or always off | Dim while the room light is on, off in the dark, wakes on hand proximity | Casa + Home Assistant |
+| **Screen at night** | Always on or always off | Dim while the room light or the PC is on, off in the dark, wakes on hand proximity | Casa + Home Assistant |
+| **Music with the screen off** | The Wi-Fi driver dropped all multicast: the receiver vanished from Music Assistant / HA | Always discoverable | Boot script re-disables the driver's suspend mode |
 | **Clock** | 1 h off (no telephony/location → stuck on GMT) | Correct time zone | Manual time zone at install |
 
 Still open: an occasional out-of-memory reboot after long SmartTube sessions — see
 [docs/KNOWN-ISSUES.md](docs/KNOWN-ISSUES.md).
+
+## Why not Fully Kiosk Browser or Kiosk Satellite?
+
+Fully Kiosk and Kiosk Satellite solve a different problem: showing a web page (the Home Assistant dashboard)
+full-screen on a normal tablet. On a 1 GB clock that runs into everything:
+
+1. **Memory.** Both load a full browser engine (WebView) running the Home Assistant frontend: 100–150 MB of RAM,
+   plus the GPU memory of an animated web page. Casa is plain Java, ~100 KB with no dependencies, and uses ~5 MB
+   of GPU memory. When the kernel can only use ~500 MB, that is the difference between SmartTube running and
+   the system stalling.
+2. **A kiosk app doesn't fix the clock.** The crashes came from the system itself: a boot animation taking 765 MB
+   of GPU memory, no app ever being compiled, a tiny kernel memory reserve and ~45 useless background apps.
+   A kiosk app touches none of that, and an uncompiled WebView is the worst thing to run in that situation.
+   This project fixes the whole device, not just the screen.
+3. **Network and heat.** The HA web UI keeps its connection and its JavaScript running even when nobody looks at
+   it. Casa subscribes only to the entities it shows, redraws only the tile that changed, and disconnects when
+   another app is in front. Idle CPU is around 1 %.
+4. **It does things a kiosk can't:**
+   - It is a music receiver: Home Assistant and Music Assistant find it on their own, and YouTube tracks start in
+     ~2 s instead of ~46 s.
+   - It is the home screen, with SmartTube one tap away.
+   - It wakes the screen in ~0.1 s when a hand comes close, using the proximity sensor's raw value.
+   - It dims the screen based on the room light or your PC, without any Home Assistant automations.
+   - The top button becomes play/pause.
+   - It stays discoverable for music with the screen off, which needed a fix to the Wi-Fi driver.
+
+   Fully Kiosk has camera motion detection and screen control, but it can't act as a DLNA speaker or change the
+   Wi-Fi driver or the boot process.
+5. **Made for this screen.** Casa is designed for 800×480 viewed from across a nightstand: a big clock, large
+   touch tiles, everything readable at a glance. A web dashboard designed for phones or tablets ends up small
+   and slow here.
+6. **No cost, no lock-in.** Fully Kiosk Plus is paid and closed source, and Kiosk Satellite relies on its own
+   server. This project is open source and fully local, and anyone can change it.
+
+**The trade-off:** with a kiosk, any new Home Assistant card shows up automatically. In Casa every entity type
+(lights, switches, media players, sensors…) is coded by hand. For what a bedside clock is actually used for,
+that trade is well worth it.
 
 ## Requirements
 
@@ -74,7 +112,7 @@ Still open: an occasional out-of-memory reboot after long SmartTube sessions —
 ## Quick start
 
 ```bash
-git clone https://github.com/datingesp-hash/MiSmartClock-Light && cd MiSmartClock-Light
+git clone https://github.com/datingesp-hash/MiSmartClock-CasaApp && cd MiSmartClock-CasaApp
 
 # 1. Device fixes (root via phh-su). Read docs/DEVICE.md first.
 device/install.sh                          # TZ_ID=Europe/London device/install.sh to force a time zone
@@ -82,7 +120,7 @@ adb reboot
 
 # 2. Casa: copy and edit the config (HA URL, token, rooms, entities)
 cp app/config.example.json ~/casa-config.json
-APK=~/Downloads/Casa-v1.18.apk app/deploy.sh ~/casa-config.json   # or omit APK= to build from source
+APK=~/Downloads/Casa-v1.19.apk app/deploy.sh ~/casa-config.json   # or omit APK= to build from source
 ```
 
 Full walkthrough: **[docs/INSTALL.md](docs/INSTALL.md)**.

@@ -43,7 +43,8 @@ Back only closes the open panel; Casa never closes because it is the launcher.
 Casa includes its own **UPnP AV MediaRenderer** ("Mi Smart Clock") in plain Java, running in a foreground
 service (`DlnaService`) so it stays available while another app (SmartTube) is in front.
 
-- **SSDP discovery** (239.255.255.250:1900): answers `M-SEARCH` and announces `ssdp:alive` every 5 min
+- **SSDP discovery** (239.255.255.250:1900): answers `M-SEARCH` (from port 1900, so firewalls on the
+  searcher accept the reply; also with the screen off, see [DEVICE.md](DEVICE.md#wi-fi-multicast-with-the-screen-off)) and announces `ssdp:alive` every 5 min
   (`ssdp:byebye` on stop). Home Assistant finds it under *Integrations → DLNA Digital Media Renderer*.
 - **HTTP on port 49494**: `/desc.xml` (device description) and the SCPDs in `app/assets/`.
 - **SOAP control**:
@@ -89,6 +90,9 @@ Made to read the time at a glance without the screen always at full brightness:
   on by itself. Casa holds a `SCREEN_DIM_WAKE_LOCK` while any of those lights is on.
 - **Light off**: the screen turns off after 1 min without touches.
 - Which lights count: `"room_lights"` in `config.json`; by default, the `light.*` entities of the first room.
+- **Other things that keep it on**: `"keep_screen_on"`, any entity (e.g. your PC's switch): while it is `on`
+  (or `playing` / `home`) the screen behaves as with the light on — dimmed, never off. It doesn't need to be
+  on screen.
 - With the screen off and Casa in front, the HA connection **is kept** to follow the light
   (with SmartTube in front it disconnects as usual).
 - The clock's ambient light sensor is useless for this: it reads 1–2 lux with the light on.
@@ -134,6 +138,7 @@ inside the APK. `deploy.sh` copies it with root. Example: [`app/config.example.j
 | `color` | optional `#RRGGBB` to force the accent colour |
 | `inputs` | optional; extra buttons in the panel that call an entity-less service (`domain.service`) |
 | `room_lights` | optional list of the `light.*` in the clock's room (dimmed instead of off while any is on); default: the lights of the first room |
+| `keep_screen_on` | optional list of any entities (a PC, a TV…) that also keep the screen on, dimmed when idle |
 | `receiver_name` | optional DLNA receiver name |
 | `language` | optional `en` or `es`; default: the system language (Spanish if it is Spanish, otherwise English) |
 

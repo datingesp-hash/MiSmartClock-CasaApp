@@ -22,7 +22,8 @@ What it does (all reversible, details in [DEVICE.md](DEVICE.md)):
 
 1. Boot script `/data/adb/service.d/99-smartclock-tune.sh` (VM + lmkd tuning, AOT compilation of key apps)
    and `/data/adb/aot.sh`.
-2. Top button: `98-smartclock-buttons.sh` + a key layout so 1 press = play/pause, 2 = screen on/off.
+2. Wi-Fi: `97-smartclock-wifi.sh` keeps multicast (DLNA discovery) working with the screen off.
+   Top button: `98-smartclock-buttons.sh` + a key layout so 1 press = play/pause, 2 = screen on/off.
 3. Time zone: your computer's, or `TZ_ID=Area/City device/install.sh`.
 4. Magisk module `smartclock-noboot`: no boot animation + overlay for instant brightness changes
    (builds `device/overlay/SmartClockOverlay.apk` — needs the Android SDK; if you don't have it, comment
@@ -45,10 +46,10 @@ What it does (all reversible, details in [DEVICE.md](DEVICE.md)):
    cp app/config.example.json ~/casa-config.json
    ```
 
-3. Deploy. Either with the APK from [Releases](https://github.com/datingesp-hash/MiSmartClock-Light/releases/latest):
+3. Deploy. Either with the APK from [Releases](https://github.com/datingesp-hash/MiSmartClock-CasaApp/releases/latest):
 
    ```bash
-   APK=~/Downloads/Casa-v1.18.apk app/deploy.sh ~/casa-config.json
+   APK=~/Downloads/Casa-v1.19.apk app/deploy.sh ~/casa-config.json
    ```
 
    or building from source (needs the Android SDK and JDK 17+):
