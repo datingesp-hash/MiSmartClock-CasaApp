@@ -1,0 +1,5 @@
+# Xiaomi Mi Smart Clock - top button (mic-mute switch, "mtk-pmic-keys", scancode 248).
+# The vendor Generic.kl maps it to POWER; here it is left unmapped so Android ignores it and
+# /data/adb/service.d/98-smartclock-buttons.sh handles it: 1 press = play/pause, 2 presses = screen on/off.
+# Installed in /data/system/devices/keylayout/ (loaded when the input device opens: needs a reboot).
+key 114   VOLUME_DOWN

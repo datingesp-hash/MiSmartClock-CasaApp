@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="384" viewBox="0 0 760 384" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" role="img" aria-labelledby="t d">
+<title id="t">Before vs after</title><desc id="d">GPU memory at boot: before 765 MB, after 33 MB; Idle memory stall: before ~20 %, after ~0 %; Seek inside a YouTube track: before ~46 s, after ~2 s; Brightness wake from dimmed: before ~2.5 s, after instant. Lower is better.</desc>
+<style>
+.bg{fill:#fcfcfb}.t1{fill:#0b0b0b}.t2{fill:#52514e}.b{fill:#eb6834}.a{fill:#2a78d6}.ax{stroke:#d9d8d3}
+@media (prefers-color-scheme:dark){.bg{fill:#1a1a19}.t1{fill:#f0efec}.t2{fill:#c3c2b7}.b{fill:#d95926}.a{fill:#3987e5}.ax{stroke:#383835}}
+</style>
+<rect class="bg" width="760" height="384" rx="12"/>
+<text class="t1" x="24" y="34" font-size="18" font-weight="600">Before vs after on the Mi Smart Clock</text>
+<text class="t2" x="24" y="56" font-size="13">Lower is better · each row has its own scale</text>
+<rect class="b" x="560" y="44" width="12" height="12" rx="3"/><text class="t2" x="578" y="54" font-size="13">Before</text>
+<rect class="a" x="650" y="44" width="12" height="12" rx="3"/><text class="t2" x="668" y="54" font-size="13">After</text>
+<text class="t1" x="24" y="106" font-size="14" font-weight="600">GPU memory at boot</text>
+<text class="t2" x="24" y="124" font-size="12">boot animation textures</text>
+<line class="ax" x1="250" y1="86" x2="250" y2="132" stroke-width="1"/>
+<path class="b" d="M250,90 h416.0 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 h-416.0 z"/>
+<text class="t1" x="678.0" y="103" font-size="13">765 MB</text>
+<path class="a" d="M250,110 h14.1 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 h-14.1 z"/>
+<text class="t1" x="276.1" y="123" font-size="13">33 MB</text>
+<text class="t1" x="24" y="180" font-size="14" font-weight="600">Idle memory stall</text>
+<text class="t2" x="24" y="198" font-size="12">PSI full avg300</text>
+<line class="ax" x1="250" y1="160" x2="250" y2="206" stroke-width="1"/>
+<path class="b" d="M250,164 h416.0 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 h-416.0 z"/>
+<text class="t1" x="678.0" y="177" font-size="13">~20 %</text>
+<path class="a" d="M250,184 h-1.0 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 h--1.0 z"/>
+<text class="t1" x="261.0" y="197" font-size="13">~0 %</text>
+<text class="t1" x="24" y="254" font-size="14" font-weight="600">Seek inside a YouTube track</text>
+<text class="t2" x="24" y="272" font-size="12">YouTube stream, before the caching proxy</text>
+<line class="ax" x1="250" y1="234" x2="250" y2="280" stroke-width="1"/>
+<path class="b" d="M250,238 h416.0 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 h-416.0 z"/>
+<text class="t1" x="678.0" y="251" font-size="13">~46 s</text>
+<path class="a" d="M250,258 h14.3 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 h-14.3 z"/>
+<text class="t1" x="276.3" y="271" font-size="13">~2 s</text>
+<text class="t1" x="24" y="328" font-size="14" font-weight="600">Brightness wake from dimmed</text>
+<text class="t2" x="24" y="346" font-size="12">dimmed → normal</text>
+<line class="ax" x1="250" y1="308" x2="250" y2="354" stroke-width="1"/>
+<path class="b" d="M250,312 h416.0 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 h-416.0 z"/>
+<text class="t1" x="678.0" y="325" font-size="13">~2.5 s</text>
+<path class="a" d="M250,332 h-1.0 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 h--1.0 z"/>
+<text class="t1" x="261.0" y="345" font-size="13">instant</text>
+</svg>

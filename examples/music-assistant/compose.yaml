@@ -1,0 +1,29 @@
+# Music Assistant + YouTube Music (free) to send music to the clock.
+# See docs/MUSIC.md. Start with: docker compose up -d
+services:
+  music-assistant:
+    # Community image = official Music Assistant + the "YouTube Music (Free)" provider (no account needed).
+    # Unofficial: may break if YouTube changes. Official image: ghcr.io/music-assistant/server:latest
+    # https://github.com/sproft/ytmusic-free-provider
+    image: ghcr.io/sproft/ytmusic-free-provider:edge
+    container_name: music-assistant
+    restart: unless-stopped
+    # Host networking is required to discover DLNA / Chromecast / AirPlay speakers over multicast.
+    # Web UI on http://<server>:8095
+    network_mode: host
+    volumes:
+      - ./data:/data
+    environment:
+      - TZ=Etc/UTC          # set your own, e.g. Europe/London
+      - LOG_LEVEL=info
+
+  yt-potoken:
+    # Generates the "PO tokens" YouTube requires; without it YouTube Music playback stops early.
+    # Pinned to the version Music Assistant supports. Only listens on the server's localhost:
+    # Music Assistant (host network) uses its default URL http://127.0.0.1:4416
+    image: brainicism/bgutil-ytdlp-pot-provider:1.2.1
+    container_name: yt-potoken
+    restart: unless-stopped
+    init: true
+    ports:
+      - 127.0.0.1:4416:4416

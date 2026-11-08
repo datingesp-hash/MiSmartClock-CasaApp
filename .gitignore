@@ -1,0 +1,9 @@
+# build outputs
+app/build/
+*.apk
+*.idsig
+# secrets: the real config holds the Home Assistant token
+config.json
+*.keystore
+*.jks
+device/overlay/build/

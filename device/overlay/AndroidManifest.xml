@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Framework overlay for the clock: instant brightness changes (dim -> bright on touch).
+     targetSdk 28 + preinstalled (Magisk module, /system/product/overlay) lets it overlay non-overlayable configs. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.archie.smartclock.overlay">
+    <overlay android:targetPackage="android" android:isStatic="true" android:priority="999" />
+    <application android:hasCode="false" />
+</manifest>

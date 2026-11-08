@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- default 180 / 60 (0-255 per second, ~2.5 s from dim to bright here). 0 = no ramp: instant jump
+         (any value is clamped to 1.0/s, still ~0.6 s). -->
+    <integer name="config_brightness_ramp_rate_fast">0</integer>
+    <integer name="config_brightness_ramp_rate_slow">0</integer>
+</resources>

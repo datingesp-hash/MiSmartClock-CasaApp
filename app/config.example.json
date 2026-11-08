@@ -1,0 +1,33 @@
+{
+  "url": "http://192.168.1.10:8123",
+  "token": "PASTE_YOUR_LONG_LIVED_ACCESS_TOKEN_HERE",
+  "language": "en",
+  "receiver_name": "Mi Smart Clock",
+  "room_lights": ["light.bedside"],
+  "rooms": [
+    {
+      "name": "Bedroom",
+      "entities": [
+        { "id": "light.bedside", "name": "Bedside", "icon": "lightbulb" },
+        { "id": "light.led_strip", "name": "LED strip", "icon": "led-strip-variant" },
+        { "id": "media_player.apple_tv", "name": "Apple TV", "icon": "television-play" },
+        {
+          "id": "switch.tv", "name": "TV", "icon": "television",
+          "inputs": [
+            { "name": "PC", "icon": "monitor", "service": "script.tv_input_pc" },
+            { "name": "Apple TV", "icon": "television-play", "service": "script.tv_input_apple_tv" }
+          ]
+        },
+        { "id": "sensor.bedroom_temperature", "name": "Temperature", "icon": "thermometer" },
+        { "id": "sensor.bedroom_humidity", "name": "Humidity", "icon": "water-percent" }
+      ]
+    },
+    {
+      "name": "Living room",
+      "entities": [
+        { "id": "light.floor_lamp", "name": "Floor lamp", "icon": "floor-lamp", "color": "#FFB340" },
+        { "id": "fan.heater", "name": "Heater", "icon": "radiator" }
+      ]
+    }
+  ]
+}
