@@ -1,4 +1,4 @@
-# MiSmartClock-Light
+# MMiSmartClock-CasaApp
 
 Turn a **Xiaomi Mi Smart Clock (LX04)** running a custom Android 13 GSI into a fast, stable little
 **Home Assistant panel, music speaker and YouTube screen** — squeezing everything out of its 1 GB of RAM.
