@@ -23,6 +23,11 @@ adb shell "$SU -c 'cat /data/local/tmp/98-smartclock-buttons.sh > /data/adb/serv
   chmod 755 /data/system/devices \$K; chmod 644 \$K/mtk-pmic-keys.kl; restorecon -R /data/system/devices;
   rm /data/local/tmp/98-smartclock-buttons.sh /data/local/tmp/mtk-pmic-keys.kl'"
 
+echo "== Wi-Fi: keep receiving multicast (DLNA discovery) with the screen off"
+adb push service.d/97-smartclock-wifi.sh /data/local/tmp/ >/dev/null
+adb shell "$SU -c 'cat /data/local/tmp/97-smartclock-wifi.sh > /data/adb/service.d/97-smartclock-wifi.sh;
+  chmod 755 /data/adb/service.d/97-smartclock-wifi.sh; rm /data/local/tmp/97-smartclock-wifi.sh'"
+
 echo "== time zone"
 TZ_ID=${TZ_ID:-$(timedatectl show -p Timezone --value 2>/dev/null || readlink /etc/localtime | sed 's|.*zoneinfo/||')}
 echo "   $TZ_ID"

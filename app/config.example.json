@@ -4,6 +4,7 @@
   "language": "en",
   "receiver_name": "Mi Smart Clock",
   "room_lights": ["light.bedside"],
+  "keep_screen_on": ["switch.pc"],
   "rooms": [
     {
       "name": "Bedroom",

@@ -25,8 +25,8 @@ crashing on boot and thrashing at idle.
   controls slides in front of the clock when music starts.
 - **Fast YouTube streams** — a local caching proxy makes YouTube Music tracks start and seek in ~2 s
   instead of ~46 s.
-- **Glanceable screen** — stays on (dimmed) while the room light is on, turns off in the dark, wakes up
-  instantly when you bring your hand close (raw IR proximity reading).
+- **Glanceable screen** — stays on (dimmed) while the room light (or e.g. your PC) is on, turns off in the
+  dark, wakes up instantly when you bring your hand close (raw IR proximity reading).
 - **Top button remapped** — 1 press = play/pause, 2 presses = screen on/off.
 - **English and Spanish** UI (follows the system language, or set `"language"` in the config).
 
@@ -56,7 +56,8 @@ stalled constantly, crashed `system_server` on every boot and sometimes rebooted
 | **Music** | No way to send music to the clock (Google Cast receivers need Google certificates) | Built-in DLNA receiver, discovered by Home Assistant / Music Assistant | Casa |
 | **YouTube Music seek** | **~46 s** (Android's WebM extractor scans the whole file; YouTube throttles full downloads) | **~2 s** start and seek | Casa's local caching proxy (1 MB `Range` chunks) |
 | **Dimmed → bright** | ~2.5 s brightness ramp | Instant | Framework overlay with brightness ramp = 0 |
-| **Screen at night** | Always on or always off | Dim while the room light is on, off in the dark, wakes on hand proximity | Casa + Home Assistant |
+| **Screen at night** | Always on or always off | Dim while the room light or the PC is on, off in the dark, wakes on hand proximity | Casa + Home Assistant |
+| **Music with the screen off** | The Wi-Fi driver dropped all multicast: the receiver vanished from Music Assistant / HA | Always discoverable | Boot script re-disables the driver's suspend mode |
 | **Clock** | 1 h off (no telephony/location → stuck on GMT) | Correct time zone | Manual time zone at install |
 
 Still open: an occasional out-of-memory reboot after long SmartTube sessions — see
@@ -82,7 +83,7 @@ adb reboot
 
 # 2. Casa: copy and edit the config (HA URL, token, rooms, entities)
 cp app/config.example.json ~/casa-config.json
-APK=~/Downloads/Casa-v1.18.apk app/deploy.sh ~/casa-config.json   # or omit APK= to build from source
+APK=~/Downloads/Casa-v1.19.apk app/deploy.sh ~/casa-config.json   # or omit APK= to build from source
 ```
 
 Full walkthrough: **[docs/INSTALL.md](docs/INSTALL.md)**.

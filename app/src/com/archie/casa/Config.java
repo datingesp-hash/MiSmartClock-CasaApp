@@ -30,6 +30,8 @@ final class Config {
     final ArrayList<Room> rooms = new ArrayList<>();
     /** Lights of the clock's room: while any is on the screen stays on (dimmed) instead of going off. */
     final ArrayList<String> roomLights = new ArrayList<>();
+    /** room_lights + keep_screen_on: any of these "on" keeps the screen on (dimmed when idle). */
+    final ArrayList<String> awake = new ArrayList<>();
 
     static Config load(File f) throws Exception {
         JSONObject o = new JSONObject(new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8));
@@ -80,6 +82,9 @@ final class Config {
         if (rl != null) for (int i = 0; i < rl.length(); i++) c.roomLights.add(rl.getString(i));
         else if (!c.rooms.isEmpty()) // default: the lights of the first room
             for (Item it : c.rooms.get(0).items) if ("light".equals(it.domain)) c.roomLights.add(it.id);
+        c.awake.addAll(c.roomLights);
+        JSONArray ko = o.optJSONArray("keep_screen_on"); // e.g. the PC: any domain
+        if (ko != null) for (int i = 0; i < ko.length(); i++) if (!c.awake.contains(ko.getString(i))) c.awake.add(ko.getString(i));
         return c;
     }
 }

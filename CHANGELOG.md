@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.19
+
+- **Fix: the music receiver disappeared while the screen was off.** The MTK Wi-Fi driver drops all multicast
+  in suspend mode; new boot script `device/service.d/97-smartclock-wifi.sh` turns suspend mode back off
+  (re-run `device/install.sh`).
+- SSDP replies are sent from port 1900, so senders behind a stateful firewall (ufw) see the clock.
+- New `keep_screen_on` config option: any entities (e.g. your PC) that keep the screen on, dimmed when idle.
+
 ## v1.18 — first public release
 
 - English UI (follows the system language; Spanish still available, or set `"language"` in `config.json`).

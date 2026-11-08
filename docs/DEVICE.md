@@ -109,6 +109,19 @@ The mic-mute button is `KEY_MICMUTE` (code 248) on `mtk-pmic-keys`, and the vend
 - Without POWER there is no long-press power menu: shut down or reboot from Settings or with
   `adb shell reboot -p` / `adb reboot`.
 
+### Wi-Fi multicast with the screen off
+
+On screen off Android sends `SETSUSPENDMODE 1` to the MTK Wi-Fi driver, and the driver then drops **all
+multicast**, even with a `MulticastLock` held (measured with `tcpdump` on the clock: 11 SSDP packets with the
+screen on, 0 with it off). Casa's DLNA receiver kept answering HTTP, but it no longer heard `M-SEARCH`, so
+Music Assistant / Home Assistant lost it until someone turned the screen on. The global setting
+`wifi_suspend_optimizations_enabled` is ignored on this build.
+
+[`/data/adb/service.d/97-smartclock-wifi.sh`](../device/service.d/97-smartclock-wifi.sh) follows `logcat` and,
+right after every `SETSUSPENDMODE 1`, sends `DRIVER SETSUSPENDMODE 0` through
+`wpa_cli -g @android:wpa_wlan0`. Wi-Fi power save stays on; only the multicast filter goes away. Log in
+`/data/local/tmp/smartclock-wifi.log`.
+
 ### 3. Disabled packages
 
 [`device/disabled-packages.txt`](../device/disabled-packages.txt) with `pm disable-user --user 0`
@@ -160,7 +173,7 @@ Heat comes from the backlight, Wi-Fi and, above all, video decoding in SmartTube
 ## Undo
 
 ```bash
-adb shell /system/xbin/su -c 'rm /data/adb/service.d/99-smartclock-tune.sh /data/adb/service.d/98-smartclock-buttons.sh /data/adb/aot.sh; rm -r /data/adb/modules/smartclock-noboot; rm /data/system/devices/keylayout/mtk-pmic-keys.kl'
+adb shell /system/xbin/su -c 'rm /data/adb/service.d/99-smartclock-tune.sh /data/adb/service.d/98-smartclock-buttons.sh /data/adb/service.d/97-smartclock-wifi.sh /data/adb/aot.sh; rm -r /data/adb/modules/smartclock-noboot; rm /data/system/devices/keylayout/mtk-pmic-keys.kl'
 while read p; do adb shell pm enable "$p"; done < device/disabled-packages.txt
 while read p; do adb shell cmd package install-existing "$p"; done < device/uninstalled-user0-packages.txt
 adb shell cmd package set-home-activity com.android.launcher3/.uioverrides.QuickstepLauncher
