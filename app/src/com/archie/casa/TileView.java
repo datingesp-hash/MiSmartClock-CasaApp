@@ -31,8 +31,12 @@ final class TileView extends View {
 
     @Override public boolean hasOverlappingRendering() { return false; }
 
+    /** Drawing scale: bigger tiles (zoomed rooms) scale their contents up, within reason. */
+    private float k = 1f;
+
     @Override protected void onSizeChanged(int w, int h, int ow, int oh) {
-        nameFit = TextUtils.ellipsize(item.name, Ui.name, w - Ui.dpf(24), TextUtils.TruncateAt.END);
+        k = Math.max(1f, Math.min(1.45f, h / Ui.dpf(96)));
+        nameFit = TextUtils.ellipsize(item.name, Ui.name, w / k - Ui.dpf(24), TextUtils.TruncateAt.END);
     }
 
     @Override protected void drawableStateChanged() {
@@ -41,7 +45,7 @@ final class TileView extends View {
     }
 
     @Override protected void onDraw(Canvas c) {
-        final int w = getWidth(), h = getHeight();
+        final float w = getWidth() / k, h = getHeight() / k;
         final boolean sensor = "sensor".equals(item.domain);
         final boolean on = Ui.isOn(item, entity);
         final boolean pressed = isPressed() && !sensor;
@@ -49,6 +53,7 @@ final class TileView extends View {
         final float r = Ui.dpf(22), pad = Ui.dpf(12), cr = Ui.dpf(17);
 
         int save = c.save();
+        c.scale(k, k);
         if (pressed) c.scale(0.96f, 0.96f, w / 2f, h / 2f);
 
         Ui.fill.setColor(on ? (pressed ? Ui.TILE_ON_PRESSED : Ui.TILE_ON) : (pressed ? Ui.CARD2 : Ui.CARD));

@@ -23,7 +23,7 @@ final class RoomView extends ViewGroup {
     private final ArrayList<Drawable> sensorIcons = new ArrayList<>();
     private Map<String, Ha.Entity> states;
     private int cols = 1, tileW, tileH;
-    private final int gap = Ui.dp(10), titleH = Ui.dp(34);
+    private int gap = Ui.dp(10), titleH = Ui.dp(34);
 
     RoomView(Context c, String title) {
         super(c);
@@ -37,6 +37,16 @@ final class RoomView extends ViewGroup {
         sp.setColor(Ui.TXT2);
         setWillNotDraw(false);
         setClipChildren(false);
+    }
+
+    /** Zoomed mode: the room gets a whole column, so a slightly bigger title and spacing. */
+    void setZoomed(boolean z) {
+        tp.setTextSize(Ui.dpf(z ? 21 : 18));
+        sp.setTextSize(Ui.dpf(z ? 15 : 13.5f));
+        titleH = Ui.dp(z ? 40 : 34);
+        gap = Ui.dp(z ? 12 : 10);
+        requestLayout();
+        invalidate();
     }
 
     void addSensor(Config.Item it) {
@@ -62,7 +72,7 @@ final class RoomView extends ViewGroup {
         tileH = Math.max(Ui.dp(60), (h - titleH - gap) / 2);
         tileW = Math.round(tileH * 1.32f);
         cols = Math.max(1, (n + 1) / 2);
-        int head = (int) tp.measureText(title) + Ui.dp(8) + sensors.size() * Ui.dp(76);
+        int head = (int) tp.measureText(title) + Ui.dp(8) + sensors.size() * Math.round(sp.getTextSize() * 5.6f);
         int w = Math.max(cols * tileW + (cols - 1) * gap, head);
         int cw = MeasureSpec.makeMeasureSpec(tileW, MeasureSpec.EXACTLY);
         int ch = MeasureSpec.makeMeasureSpec(tileH, MeasureSpec.EXACTLY);

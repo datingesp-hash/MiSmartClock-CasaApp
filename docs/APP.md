@@ -24,6 +24,10 @@ The Home Assistant web UI, the official companion app or Fully Kiosk all load a 
   - **Long-press the time** → Android Settings (escape hatch: there is no app drawer).
 - **Right, rooms**: name on the left and a 2-row grid of its entities underneath.
   At most 2 rooms per column; the rest is reached by scrolling right.
+  - **Zoom** (capsule in the bottom-right corner, `ZoomSwitch.java`): left = overview (2 rooms per column);
+    right = **one room per column**, full height, with bigger tiles (tile contents scale up to ×1.45) and
+    scrolling that snaps to the start/end of each room. Tap to toggle (or drag the thumb); the change is
+    animated (fade + scale around the room in view) and remembered across launches.
   - **Sensors** are not tiles: they appear next to the room name, in grey with a small icon (`26.6° 62%`).
 
 ## Interaction
@@ -59,7 +63,9 @@ service (`DlnaService`) so it stays available while another app (SmartTube) is i
 - **Now Playing card**: shares the slot with the clock. **When music starts** (and nothing was playing) it
   comes to the front with an animation; track changes within a queue don't move it. Otherwise it waits
   **behind the clock**, peeking out on the right; **swipe right to swap** them (the front card tilts out to the
-  right over the rooms and goes behind while the other grows; the drag drives the animation — `CardStack.java`,
+  right over the rooms and goes behind while the other grows; the drag drives the animation and the swap
+  completes under your finger, without lifting it — one swipe swaps at most once, so a long swipe can't land
+  back on the card you started from — `CardStack.java`,
   with its own frame loop because system animations are off on the clock). It shows the artwork
   (`upnp:albumArtURI`, downscaled in RGB_565), title, artist, progress (tap to seek) and three big buttons:
   stop (clears the queue and hides the card), play/pause and next (if the controller sent a next track).
@@ -80,6 +86,49 @@ Tested with [`async-upnp-client`](https://github.com/StevenLooman/async_upnp_cli
 Assistant's DLNA integration, `DmrDevice` profile): load, play, pause, seek, stop, position/duration/volume.
 
 How to send music to it: [MUSIC.md](MUSIC.md).
+
+## Synced lyrics
+
+![Lyrics](img/lyrics.png)
+
+<sub>Spanish UI.</sub>
+
+- **Round lyrics button** (above the zoom capsule, `LyricsButton.java`): only there while the receiver has
+  music (it pops in with a small scale animation). Tap it and the Now Playing card comes to the front (if the
+  clock was there) while **the lyrics take over the whole rooms area**; the button turns white. Tap it again to
+  hide only the lyrics (the music card stays). Swiping to the clock card, the music ending or Back also hide them.
+- **Apple Music style** (`LyricsView.java`): big bold lines; the line being sung is white and slightly larger,
+  the rest dimmed; syllable-timed lyrics fill in with a soft edge; the list glides to keep the current line in
+  the upper third, the lines below following a beat later (a gentle wave); long instrumental breaks are three
+  breathing dots that light up as the vocals come back; Apple duets put the second voice on the right. Drag to
+  look around (it comes back after 3.5 s); **tap a line to seek** there. Unsynced lyrics scroll along with the
+  song. The source is shown, small, in the bottom-right corner.
+- **Brightness**: with the lyrics on screen and music playing, Casa dims the screen itself instead of the
+  system (whose dim level is 5 %, unreadable): after the screen timeout it glides down to **30 %**
+  (`LYRICS_DIM` in `MainActivity`) and stays on; a touch or a hand in front of the clock brings full brightness
+  back. Paused or with the lyrics closed, the normal system behaviour returns.
+- **Cost**: 60 fps only while something moves, ~30 fps while a line is being swept, otherwise it sleeps until
+  the next line starts (≈20–30 % of one core while singing, ~2 % with the lyrics closed).
+- **Sources** (`LyricsSources.java`, ported from [BitChord](https://github.com/kushagrasinghx/BitChord) — same
+  providers, order and race): all of them are asked **at once** and answers are taken in priority order; a synced
+  one (per syllable or per line) wins outright, plain text is only a fallback, and Genius is only asked when
+  nobody else had anything. First, BiniLyrics identifies the recording (ISRC, max 2.5 s) so lrc.red and
+  LyricsPlus can ask for that exact version. The last 8 songs are cached.
+
+  | Source | What it gives |
+  |---|---|
+  | lrc.red, BiniLyrics, BetterLyrics | Apple Music TTML, per syllable |
+  | BetterLyrics Portato | QQ Music QRC, per syllable (title/credit lines at the start are dropped) |
+  | PaxSenix: Spotify / Musixmatch | need `paxsenix_key`; not asked without one |
+  | LyricsPlus | per syllable, on volunteer mirrors raced against each other (often down) |
+  | Unison | contributed by listeners (TTML, LRC or text) |
+  | YouTube captions / YouTube Music | find the video by title + artist on YouTube Music (title and artist must match, so it never brings another song); timed captions / the Lyrics tab (plain text) |
+  | KuGou, LRCLIB | per line |
+  | Genius | plain text (no `[Chorus]` headers), last resort |
+
+  **Musixmatch direct is not included**: BitChord takes the signing key out of Musixmatch's web client, which
+  is getting around its access control; Musixmatch is available through PaxSenix with a key instead. Requests
+  carry Casa's own User-Agent (sharing another app's one gets you its rate limits).
 
 ## Screen on, dimmed or off
 
@@ -141,6 +190,8 @@ inside the APK. `deploy.sh` copies it with root. Example: [`app/config.example.j
 | `keep_screen_on` | optional list of any entities (a PC, a TV…) that also keep the screen on, dimmed when idle |
 | `receiver_name` | optional DLNA receiver name |
 | `language` | optional `en` or `es`; default: the system language (Spanish if it is Spanish, otherwise English) |
+| `paxsenix_key` | optional PaxSenix API key: enables the "PaxSenix: Spotify" and "PaxSenix: Musixmatch" lyrics sources |
+| `lyrics_sources` | optional list of lyrics sources in priority order (names from the table above); the ones left out are never asked |
 
 Bundled icons: `apple`, `cast-audio`, `coach-lamp`, `desktop-tower-monitor`, `fan`, `fish`, `floor-lamp`,
 `grill`, `hdmi-port`, `home-variant`, `leaf`, `led-strip-variant`, `lightbulb`, `lightbulb-group`,
@@ -165,6 +216,11 @@ app/src/com/archie/casa/
 ├── DetailView.java     Modal panel: brightness/temperature sliders, media controls, TV inputs
 ├── CardStack.java      Clock and Now Playing card in the same slot, swipe to swap
 ├── NowPlayingView.java Now Playing card
+├── ZoomSwitch.java     Rooms zoom capsule (overview / one room per column)
+├── LyricsButton.java   Round lyrics button (above the zoom capsule, only with music)
+├── LyricsView.java     Apple Music-style synced lyrics, in the rooms area
+├── Lyrics.java         Model + parsers (LRC/enhanced LRC, Apple TTML, QRC/YRC, text) + HTTP/JSON helpers
+├── LyricsSources.java  Lyrics providers (BitChord's) and the race between them
 ├── Presence.java       Proximity (raw value) and dimmed screen tied to the room light
 ├── Remote.java         Commands from the button daemon (PLAY_PAUSE)
 └── DlnaService.java, Upnp.java, Renderer.java, StreamProxy.java   DLNA receiver (see above)

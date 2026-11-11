@@ -23,6 +23,12 @@ crashing on boot and thrashing at idle.
   SOAP control, GENA events, gapless next track, volume. Shows up in Home Assistant as a `media_player`,
   works with Music Assistant, BubbleUPnP, VLC… A **Now Playing** card with artwork, progress and big
   controls slides in front of the clock when music starts.
+- **Synced lyrics** — a round button shows the lyrics of what is playing in place of the rooms, Apple
+  Music style (syllable sweep, gliding lines, tap to seek), from the same sources as
+  [BitChord](https://github.com/kushagrasinghx/BitChord): lrc.red, BiniLyrics, BetterLyrics, LyricsPlus,
+  KuGou, LRCLIB, YouTube Music, Genius and more. The screen dims to a readable 30 % instead of 5 %.
+- **Rooms zoom** — a small capsule switches between the overview (two rooms per column) and one big room
+  per column with larger tiles.
 - **Fast YouTube streams** — a local caching proxy makes YouTube Music tracks start and seek in ~2 s
   instead of ~46 s.
 - **Glanceable screen** — stays on (dimmed) while the room light (or e.g. your PC) is on, turns off in the

@@ -48,6 +48,13 @@ final class Config {
         c.receiverName = o.optString("receiver_name", c.receiverName);
         String lang = o.optString("language", "");
         if (!lang.isEmpty()) Ui.LOC = java.util.Locale.forLanguageTag(lang);
+        LyricsSources.paxKey = o.optString("paxsenix_key", "").trim().replaceFirst("(?i)^Bearer\\s+", "");
+        JSONArray lo = o.optJSONArray("lyrics_sources"); // optional: names in priority order, others are off
+        if (lo != null) {
+            ArrayList<String> order = new ArrayList<>();
+            for (int i = 0; i < lo.length(); i++) order.add(lo.optString(i));
+            LyricsSources.order = order;
+        }
         JSONArray rs = o.getJSONArray("rooms");
         for (int i = 0; i < rs.length(); i++) {
             JSONObject r = rs.getJSONObject(i);

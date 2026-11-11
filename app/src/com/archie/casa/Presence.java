@@ -81,6 +81,8 @@ final class Presence implements SensorEventListener {
                 if (!muted && (!pm.isInteractive() || now - lastPoke >= POKE)) {
                     lastPoke = now;
                     wake(c);
+                    Runnable p = onPresence;
+                    if (p != null) p.run();
                 }
             } else if (muted && now - lastSeen >= CLEAR) {
                 muted = false;
@@ -103,6 +105,9 @@ final class Presence implements SensorEventListener {
     @Override public void onSensorChanged(SensorEvent e) {
         if (e.values[0] < prox.getMaximumRange() && !muted) wake(c);
     }
+
+    /** Someone is in front of the clock (used by the lyrics' own dimming). Called off the main thread. */
+    static volatile Runnable onPresence;
 
     /** Turn the screen on if it is off, and restart the screen-off timeout if it is on. */
     @SuppressWarnings("deprecation") // ACQUIRE_CAUSES_WAKEUP still works for apps targeting 33
