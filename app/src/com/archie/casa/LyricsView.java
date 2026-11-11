@@ -88,6 +88,18 @@ final class LyricsView extends View {
         sample();
         long dur = renderer.durationMs();
         String k = m.title + "\u0001" + m.artist;
+        // The length is what tells a song from its namesakes: when the controller didn't send it, wait
+        // for the player to know it (it reports again once prepared) instead of searching blind.
+        if (!k.equals(key) && dur <= 0 && Renderer.TRANSITIONING.equals(st) && !m.title.trim().isEmpty()) {
+            lyrics = null;
+            layouts = new StaticLayout[0];
+            loading = true;
+            noMeta = false;
+            gen++;
+            key = "";
+            kick();
+            return;
+        }
         if (!k.equals(key)) {
             key = k;
             lyrics = null;

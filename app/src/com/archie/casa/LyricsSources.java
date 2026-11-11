@@ -650,16 +650,17 @@ final class LyricsSources {
                 ArrayList<JSONObject> songs = new ArrayList<>();
                 for (int i = 0; i < info.length(); i++) {
                     JSONObject x = info.optJSONObject(i);
-                    if (x != null && (secs <= 0 || Math.abs(x.optInt("duration", -1) - secs) <= 8)) songs.add(x);
+                    if (x != null && (secs <= 0 || Math.abs(x.optInt("duration", -1) - secs) <= 8)
+                            && same(q, x.optString("songname"), x.optString("singername"))) songs.add(x);
                 }
                 java.util.Collections.sort(songs, (a, b) -> Integer.compare(Math.abs(a.optInt("duration") - secs),
                         Math.abs(b.optInt("duration") - secs)));
                 for (JSONObject x : songs) {
-                    cand = search("hash", x.optString("hash"), null);
+                    cand = search(q, "hash", x.optString("hash"), null);
                     if (cand != null) break;
                 }
             }
-            if (cand == null) cand = search("keyword", kw, secs > 0 ? String.valueOf(secs * 1000) : null);
+            if (cand == null) cand = search(q, "keyword", kw, secs > 0 ? String.valueOf(secs * 1000) : null);
             if (cand == null) return null;
             JSONObject d = Lyrics.obj(Lyrics.get("https://lyrics.kugou.com/download" + Lyrics.qs("fmt", "lrc",
                     "charset", "utf8", "client", "pc", "ver", "1", "id", cand[0], "accesskey", cand[1])));
@@ -676,12 +677,28 @@ final class LyricsSources {
             return l.isEmpty() ? null : l;
         }
 
-        private static String[] search(String k, String v, String durationMs) {
+        private static String[] search(Query q, String k, String v, String durationMs) {
             JSONObject o = Lyrics.obj(Lyrics.get("https://lyrics.kugou.com/search" + Lyrics.qs("ver", "1", "man", "yes",
                     "client", "pc", k, v, "duration", durationMs)));
             JSONArray c = o == null ? null : o.optJSONArray("candidates");
-            JSONObject f = c == null ? null : c.optJSONObject(0);
-            return f == null ? null : new String[]{f.optString("id"), f.optString("accesskey")};
+            if (c == null) return null;
+            for (int i = 0; i < c.length(); i++) {
+                JSONObject f = c.optJSONObject(i);
+                // a keyword search ranks by text: its first hit can be another song by the same artist
+                if (f == null || ("keyword".equals(k) && !same(q, f.optString("song"), f.optString("singer")))) continue;
+                return new String[]{f.optString("id"), f.optString("accesskey")};
+            }
+            return null;
+        }
+
+        /** Same song: same title (outside brackets / " - " suffixes) and at least one shared artist. */
+        static boolean same(Query q, String title, String singers) {
+            if (title == null || title.isEmpty()) return false;
+            if (!norm(LrcRed.coreOf(title)).equals(norm(LrcRed.coreOf(q.title)))) return false;
+            HashSet<String> want = LrcRed.artists(q.artist);
+            if (want.isEmpty()) return true;
+            for (String a : LrcRed.artists(singers == null ? "" : singers.replace('、', ','))) if (want.contains(a)) return true;
+            return false;
         }
 
         static String stripCredits(String lrc) {
