@@ -10,8 +10,8 @@ import android.view.MotionEvent;
 import android.view.View;
 
 /**
- * Round lyrics toggle that floats above the zoom switch. Same translucent material as the switch
- * when off; solid white with a dark glyph when on. Pops in/out (scale + fade) as music comes and goes.
+ * Round lyrics toggle in the top-right corner of the Now Playing card. Card grey (like the card's own
+ * buttons) when off; solid white with a dark glyph when on. Pops in/out (scale + fade) with the music.
  */
 final class LyricsButton extends View {
     interface Listener { void onLyrics(); }
@@ -86,14 +86,12 @@ final class LyricsButton extends View {
         float w = getWidth(), h = getHeight(), r = Math.min(w, h) / 2f, cx = w / 2f, cy = h / 2f;
         // material
         p.setStyle(Paint.Style.FILL);
-        p.setColor(blend(0xE6161618, 0xFFF2F2F7, onF));
+        p.setColor(blend(Ui.CARD2, 0xFFF2F2F7, onF));
         c.drawCircle(cx, cy, r, p);
-        if (onF < 0.99f) {
-            p.setStyle(Paint.Style.STROKE);
-            p.setStrokeWidth(Math.max(1f, Ui.dpf(0.6f)));
-            p.setColor(((int) (0x24 * (1 - onF)) << 24) | 0xFFFFFF);
-            c.drawCircle(cx, cy, r - 0.5f, p);
-        }
+        // the glyph is drawn for a 36 dp button: scale it to this one
+        int save = c.save();
+        float k = r * 2 / Ui.dpf(36);
+        c.scale(k, k, cx, cy);
         // glyph: speech bubble with two lines of "text"
         int ink = blend(Ui.TXT, 0xFF1C1C1E, onF);
         float bw = Ui.dpf(15), bh = Ui.dpf(11.5f), rad = Ui.dpf(3.5f);
@@ -121,6 +119,7 @@ final class LyricsButton extends View {
         float y1 = t + bh * 0.38f, y2 = t + bh * 0.66f;
         c.drawLine(l + Ui.dpf(3.6f), y1, l + bw - Ui.dpf(3.6f), y1, p);
         c.drawLine(l + Ui.dpf(3.6f), y2, l + bw - Ui.dpf(6.5f), y2, p);
+        c.restoreToCount(save);
     }
 
     private static int blend(int a, int b, float f) {

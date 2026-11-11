@@ -21,7 +21,7 @@ final class CardStack extends FrameLayout {
     private static final float PEEK_SCALE = 0.92f, PEEK_ALPHA = 0.55f, TILT = 7f;
     private static final long DURATION = 420;
 
-    private View front, back;
+    private View front, back, music;
     private boolean backEnabled;
 
     /** Told whenever the card in front changes (true = the music card). */
@@ -50,6 +50,7 @@ final class CardStack extends FrameLayout {
     void setCards(View frontCard, View backCard) {
         front = frontCard;
         back = backCard;
+        music = backCard;
         addView(back, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         addView(front, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         setBackEnabled(false);
@@ -61,7 +62,7 @@ final class CardStack extends FrameLayout {
         backEnabled = on;
         if (!on) {
             // music gone: make sure the clock (whichever view it is) ends up in front, no animation
-            if (front instanceof NowPlayingView) swapRoles();
+            if (front == music) swapRoles();
             animating = false;
             t = 0;
         }
@@ -69,7 +70,7 @@ final class CardStack extends FrameLayout {
         apply(0);
     }
 
-    boolean musicInFront() { return front instanceof NowPlayingView; }
+    boolean musicInFront() { return music != null && front == music; }
 
     /** New music arrived: slide the music card to the front (same animation as the swipe). */
     void showMusic() {

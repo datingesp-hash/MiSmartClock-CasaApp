@@ -80,7 +80,16 @@ public final class MainActivity extends Activity implements Ha.Listener, DetailV
         // clock in front, music card behind it (peeking out); swipe right to swap them
         nowPlaying = new NowPlayingView(this, Renderer.get(this));
         stack = new CardStack(this);
-        stack.setCards(clock, nowPlaying);
+        // the music card carries the lyrics button in its top-right corner (it moves with the card)
+        FrameLayout musicCard = new FrameLayout(this);
+        musicCard.setClipChildren(false);
+        musicCard.addView(nowPlaying, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        lyricsBtn = new LyricsButton(this, () -> setLyrics(!lyricsOn));
+        FrameLayout.LayoutParams bp = new FrameLayout.LayoutParams(Ui.dp(28), Ui.dp(28), Gravity.TOP | Gravity.END);
+        bp.topMargin = Ui.dp(8);
+        bp.rightMargin = Ui.dp(14);
+        musicCard.addView(lyricsBtn, bp);
+        stack.setCards(clock, musicCard);
         stack.setFrontListener(music -> { if (!music && lyricsOn) setLyrics(false); }); // clock in front: lyrics go
         row.setClipChildren(false);
         root.setClipChildren(false);
@@ -156,13 +165,6 @@ public final class MainActivity extends Activity implements Ha.Listener, DetailV
         zp.rightMargin = zp.bottomMargin = Ui.dp(10);
         zoomSwitch = new ZoomSwitch(this, zoomed, this::setZoomed);
         root.addView(zoomSwitch, zp);
-        // lyrics toggle, centred above the zoom switch; only there while there is music
-        int lb = Ui.dp(36);
-        FrameLayout.LayoutParams bp = new FrameLayout.LayoutParams(lb, lb, Gravity.BOTTOM | Gravity.END);
-        bp.rightMargin = zp.rightMargin + (zp.width - lb) / 2;
-        bp.bottomMargin = zp.bottomMargin + zp.height + Ui.dp(10);
-        lyricsBtn = new LyricsButton(this, () -> setLyrics(!lyricsOn));
-        root.addView(lyricsBtn, bp);
 
         detail = new DetailView(this, this);
         detail.setVisibility(View.GONE);

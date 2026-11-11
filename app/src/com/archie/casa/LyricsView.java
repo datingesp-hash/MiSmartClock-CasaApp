@@ -36,7 +36,7 @@ final class LyricsView extends View {
     private final TextPaint info = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private final Paint dot = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Handler main = new Handler(Looper.getMainLooper());
-    private final int padL = Ui.dp(6), padR = Ui.dp(54), lineGap = Ui.dp(16), slop;
+    private final int padL = Ui.dp(6), padR = Ui.dp(28), lineGap = Ui.dp(16), slop;
 
     // content
     private String key = "";

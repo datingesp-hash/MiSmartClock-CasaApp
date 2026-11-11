@@ -93,8 +93,8 @@ How to send music to it: [MUSIC.md](MUSIC.md).
 
 <sub>Spanish UI.</sub>
 
-- **Round lyrics button** (above the zoom capsule, `LyricsButton.java`): only there while the receiver has
-  music (it pops in with a small scale animation). Tap it and the Now Playing card comes to the front (if the
+- **Round lyrics button** (top-right corner of the Now Playing card, `LyricsButton.java`): it lives in the
+  card, so it is only there with music and moves with the card when you swipe. Tap it and the Now Playing card comes to the front (if the
   clock was there) while **the lyrics take over the whole rooms area**; the button turns white. Tap it again to
   hide only the lyrics (the music card stays). Swiping to the clock card, the music ending or Back also hide them.
 - **Apple Music style** (`LyricsView.java`): big bold lines; the line being sung is white and slightly larger,
@@ -217,7 +217,7 @@ app/src/com/archie/casa/
 ├── CardStack.java      Clock and Now Playing card in the same slot, swipe to swap
 ├── NowPlayingView.java Now Playing card
 ├── ZoomSwitch.java     Rooms zoom capsule (overview / one room per column)
-├── LyricsButton.java   Round lyrics button (above the zoom capsule, only with music)
+├── LyricsButton.java   Round lyrics button (corner of the Now Playing card)
 ├── LyricsView.java     Apple Music-style synced lyrics, in the rooms area
 ├── Lyrics.java         Model + parsers (LRC/enhanced LRC, Apple TTML, QRC/YRC, text) + HTTP/JSON helpers
 ├── LyricsSources.java  Lyrics providers (BitChord's) and the race between them
