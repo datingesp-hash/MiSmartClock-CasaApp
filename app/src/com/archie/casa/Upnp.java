@@ -291,6 +291,11 @@ final class Upnp implements Renderer.Listener {
 
     private int avt(String action, Map<String, String> a, LinkedMap res) {
         if (!"0".equals(a.getOrDefault("InstanceID", "0").trim())) return 718;
+        // one line per transport command, to see what a control point actually sends (adb logcat -s CasaDlna)
+        if (!action.startsWith("Get")) {
+            String u = a.getOrDefault("CurrentURI", a.getOrDefault("NextURI", a.getOrDefault("Target", "")));
+            android.util.Log.i("CasaDlna", action + " [" + r.state() + "] " + (u.length() > 90 ? u.substring(0, 90) + "…" : u));
+        }
         switch (action) {
             case "SetAVTransportURI":
                 r.setUri(a.get("CurrentURI"), a.get("CurrentURIMetaData"));
