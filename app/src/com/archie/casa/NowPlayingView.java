@@ -32,8 +32,46 @@ final class NowPlayingView extends View {
     private final TextPaint small = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private final Drawable note, play, pause, stop, next, cast;
     private final RectF rf = new RectF(), art = new RectF(), bar = new RectF();
-    private final RectF bStop = new RectF(), bPlay = new RectF(), bNext = new RectF();
+    private final RectF bStop = new RectF(), bPlay = new RectF(), bNext = new RectF(), bLyrics = new RectF();
+    private final TextPaint pill = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Drawable lyricsNote;
     private RectF pressed;
+
+    /** The LYRICS pill at the bottom of the card. */
+    interface OnLyrics { void onLyrics(); }
+    private OnLyrics onLyrics;
+    private boolean lyricsOn;
+    private float lyricsF; // 0 = off (outline), 1 = on (white)
+    private long lyricsLast;
+    private boolean lyricsAnim;
+
+    void setOnLyrics(OnLyrics l) { onLyrics = l; }
+
+    void setLyricsOn(boolean on) {
+        if (on == lyricsOn) return;
+        lyricsOn = on;
+        if (!lyricsAnim) {
+            lyricsAnim = true;
+            lyricsLast = android.os.SystemClock.uptimeMillis();
+            postOnAnimation(lyricsFrame);
+        }
+    }
+
+    private final Runnable lyricsFrame = new Runnable() {
+        @Override public void run() {
+            long t = android.os.SystemClock.uptimeMillis();
+            float dt = Math.min(64, t - lyricsLast);
+            lyricsLast = t;
+            float want = lyricsOn ? 1 : 0;
+            lyricsF += (want - lyricsF) * (1f - (float) Math.exp(-dt / 70f));
+            if (Math.abs(want - lyricsF) < 0.01f) {
+                lyricsF = want;
+                lyricsAnim = false;
+            } else postOnAnimation(this);
+            invalidate();
+        }
+    };
     private Bitmap bitmap;
     private String bitmapUrl = "";
     private volatile String loadingUrl = "";
@@ -54,6 +92,12 @@ final class NowPlayingView extends View {
         stop = Ui.icon(c, "stop");
         next = Ui.icon(c, "skip-next");
         cast = Ui.icon(c, "cast-audio");
+        lyricsNote = Ui.icon(c, "music-note");
+        pill.setTypeface(Ui.MED);
+        pill.setTextSize(Ui.dpf(12.5f));
+        pill.setLetterSpacing(0.12f);
+        stroke.setStyle(Paint.Style.STROKE);
+        stroke.setStrokeWidth(Math.max(1f, Ui.dpf(1)));
         label.setTypeface(Ui.MED);
         label.setTextSize(Ui.dpf(11));
         label.setLetterSpacing(0.08f);
@@ -161,7 +205,7 @@ final class NowPlayingView extends View {
         c.drawText(Ui.t("NOW PLAYING", "REPRODUCIENDO"), pad + ci + Ui.dpf(6), y, label);
 
         // artwork
-        float bottomBlock = Ui.dpf(172); // title, artist, progress, controls
+        float bottomBlock = Ui.dpf(222); // title, artist, progress, controls, LYRICS pill
         float side = Math.min(w - 2 * pad, h - (y + Ui.dpf(12)) - bottomBlock - pad);
         side = Math.max(Ui.dpf(60), side);
         art.set((w - side) / 2f, y + Ui.dpf(12), (w + side) / 2f, y + Ui.dpf(12) + side);
@@ -226,6 +270,44 @@ final class NowPlayingView extends View {
         boolean hasNext = !r.nextUri().isEmpty();
         if (hasNext) circle(c, bNext, next, false, 28);
         else bNext.setEmpty();
+
+        // LYRICS pill at the bottom, like the clock card's SmartTube one but quieter:
+        // just a hairline outline on the card, filling in white while the lyrics are on
+        float ph = Ui.dpf(38), e = lyricsF;
+        bLyrics.set(pad - Ui.dpf(6), h - pad + Ui.dpf(6) - ph, w - pad + Ui.dpf(6), h - pad + Ui.dpf(6));
+        boolean down = pressed == bLyrics;
+        if (e > 0.01f) { // white fill fading in/out (a touch darker while pressed)
+            Ui.fill.setColor(down ? Ui.TILE_ON_PRESSED : Ui.TILE_ON);
+            Ui.fill.setAlpha((int) (255 * e));
+            c.drawRoundRect(bLyrics, ph / 2f, ph / 2f, Ui.fill);
+            Ui.fill.setAlpha(255);
+        } else if (down) { // off and pressed: the card's button grey
+            Ui.fill.setColor(Ui.CARD2);
+            c.drawRoundRect(bLyrics, ph / 2f, ph / 2f, Ui.fill);
+        }
+        stroke.setColor(((int) (0x38 * (1 - e)) << 24) | 0xFFFFFF);
+        rf.set(bLyrics);
+        rf.inset(stroke.getStrokeWidth() / 2, stroke.getStrokeWidth() / 2);
+        c.drawRoundRect(rf, ph / 2f, ph / 2f, stroke);
+        int ink = blend(Ui.TXT, Ui.TXT_ON, e);
+        String lt = "LYRICS";
+        int nis = Ui.dp(15);
+        float gap = Ui.dpf(5), tw = pill.measureText(lt), gx = bLyrics.centerX() - (nis + gap + tw) / 2f;
+        lyricsNote.setBounds((int) gx, (int) (bLyrics.centerY() - nis / 2f), (int) gx + nis, (int) (bLyrics.centerY() + nis / 2f));
+        lyricsNote.setTint(ink);
+        lyricsNote.draw(c);
+        pill.setColor(ink);
+        c.drawText(lt, gx + nis + gap, bLyrics.centerY() - (pill.ascent() + pill.descent()) / 2f, pill);
+    }
+
+    private static int blend(int a, int b, float f) {
+        f = Ui.clamp(f);
+        int r = 0;
+        for (int sh = 0; sh < 32; sh += 8) {
+            int x = (a >>> sh) & 255, y = (b >>> sh) & 255;
+            r |= ((int) (x + (y - x) * f) & 255) << sh;
+        }
+        return r;
     }
 
     private void circle(Canvas c, RectF b, Drawable d, boolean primary, int iconDp) {
@@ -276,6 +358,8 @@ final class NowPlayingView extends View {
                         r.setUri("", null); // stop and clear: the card hides
                     } else if (p == bNext) {
                         r.next();
+                    } else if (p == bLyrics && onLyrics != null) {
+                        onLyrics.onLyrics();
                     }
                 }
                 invalidate();
@@ -291,7 +375,7 @@ final class NowPlayingView extends View {
     }
 
     private RectF hit(float x, float y) {
-        for (RectF b : new RectF[]{bPlay, bStop, bNext}) if (!b.isEmpty() && b.contains(x, y)) return b;
+        for (RectF b : new RectF[]{bPlay, bStop, bNext, bLyrics}) if (!b.isEmpty() && b.contains(x, y)) return b;
         return null;
     }
 }

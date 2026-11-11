@@ -42,7 +42,6 @@ public final class MainActivity extends Activity implements Ha.Listener, DetailV
     private int zoomRoom; // room kept in view across a zoom change
     private ZoomSwitch zoomSwitch;
     private LyricsView lyricsView;
-    private LyricsButton lyricsBtn;
     private boolean lyricsOn;
 
     private final BroadcastReceiver tick = new BroadcastReceiver() {
@@ -80,16 +79,8 @@ public final class MainActivity extends Activity implements Ha.Listener, DetailV
         // clock in front, music card behind it (peeking out); swipe right to swap them
         nowPlaying = new NowPlayingView(this, Renderer.get(this));
         stack = new CardStack(this);
-        // the music card carries the lyrics button in its top-right corner (it moves with the card)
-        FrameLayout musicCard = new FrameLayout(this);
-        musicCard.setClipChildren(false);
-        musicCard.addView(nowPlaying, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        lyricsBtn = new LyricsButton(this, () -> setLyrics(!lyricsOn));
-        FrameLayout.LayoutParams bp = new FrameLayout.LayoutParams(Ui.dp(28), Ui.dp(28), Gravity.TOP | Gravity.END);
-        bp.topMargin = Ui.dp(8);
-        bp.rightMargin = Ui.dp(14);
-        musicCard.addView(lyricsBtn, bp);
-        stack.setCards(clock, musicCard);
+        nowPlaying.setOnLyrics(() -> setLyrics(!lyricsOn)); // LYRICS pill at the bottom of the card
+        stack.setCards(clock, nowPlaying);
         stack.setFrontListener(music -> { if (!music && lyricsOn) setLyrics(false); }); // clock in front: lyrics go
         row.setClipChildren(false);
         root.setClipChildren(false);
@@ -195,7 +186,6 @@ public final class MainActivity extends Activity implements Ha.Listener, DetailV
     @Override public void onRendererChanged() {
         boolean show = nowPlaying.refresh();
         stack.setBackEnabled(show);
-        lyricsBtn.setShown(show);
         if (!show && lyricsOn) setLyrics(false);
         if (lyricsOn) lyricsView.update();
         updateLyricsAwake();
@@ -376,7 +366,7 @@ public final class MainActivity extends Activity implements Ha.Listener, DetailV
     private void setLyrics(boolean on) {
         if (on == lyricsOn) return;
         lyricsOn = on;
-        lyricsBtn.setOn(on);
+        nowPlaying.setLyricsOn(on);
         updateLyricsAwake();
         if (on) {
             if (!stack.musicInFront()) stack.showMusic();
